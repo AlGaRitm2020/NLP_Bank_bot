@@ -4,17 +4,17 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 TOKEN = '1779872877:AAGKs54Jotb37C0E7TYe0qx1KMMMkqLEYwk'
 
 def start(update: Update, context: CallbackContext):
-    reply_keyboard = [['/practice', '/theory'], ['/reg', '/stats']]
-    markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+
+
     update.message.reply_text('Привет, я бот Информатишка. Я помогу тебе в сдаче ЕГЭ по информатике. \
 Выбери номер задания, я выдам тебе задачу. Введи ответ и я проверю его правильность. \
 Введите команду /practice, чтобы начать решать задания. \
-Чтобы смотреть теорию, напишите /theory', reply_markup=markup)
+Чтобы смотреть теорию, напишите /theory')
+    print(update.message.text)
+    print(update.message.text)
 
 def info(update: Update, context: CallbackContext):
-    reply_keyboard = [['/practice', '/theory'], ['/reg', '/stats']]
-    markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
-    update.message.reply_text('ООО NLP Bank', reply_markup=markup)
+    update.message.reply_text('ООО NLP Bank')
 
 def enter_card_number(update: Update, context: CallbackContext):
     update.message.reply_text("Введите номер своей карты:")
@@ -35,12 +35,20 @@ def block(update: Update, context: CallbackContext):
     update.message.reply_text("Карта " + card_num + ' заблокирована')
     return 2
 
+def read(update, context):
+
+
+    if update.message.text == 'block':
+        reply_keyboard = [['/block']]
+        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        update.message.reply_text('Если вы хотите заблокировать карту нажмите /block', reply_markup=markup)
+
+
 # def block(update: Update, context: CallbackContext):
 
 def main() -> None:
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
-
     dispatcher.add_handler(CommandHandler("start", start))
     dispatcher.add_handler(CommandHandler("info", info))
 
@@ -65,8 +73,15 @@ def main() -> None:
     # dispatcher.add_handler(Dialog_theory)
 
     # dispatcher.add_handler(MessageHandler(Filters.text, help_command))
-    updater.start_polling()
 
+
+    # dispatcher.add_handler(MessageHandler(Filters.text, echo))
+    text_handler = MessageHandler(Filters.text, read)
+
+    # Регистрируем обработчик в диспетчере.
+    dispatcher.add_handler(text_handler)
+
+    updater.start_polling()
     updater.idle()
 
 
