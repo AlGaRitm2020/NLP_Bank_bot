@@ -11,20 +11,47 @@ def start(update: Update, context: CallbackContext):
 Введите команду /practice, чтобы начать решать задания. \
 Чтобы смотреть теорию, напишите /theory', reply_markup=markup)
 
+def info(update: Update, context: CallbackContext):
+    reply_keyboard = [['/practice', '/theory'], ['/reg', '/stats']]
+    markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+    update.message.reply_text('ООО NLP Bank', reply_markup=markup)
+
+def enter_card_number(update: Update, context: CallbackContext):
+    update.message.reply_text("Введите номер своей карты:")
+    print('enter 1')
+    return 1
+
+def enter_pin_code(update: Update, context: CallbackContext):
+    print('enter 2')
+    global card_num
+    card_num = update.message.text
+    update.message.reply_text("Введите пин код карты:")
+    return 2
+
+def block(update: Update, context: CallbackContext):
+    print('enter 3')
+    global card_num
+    pin_code = update.message.text
+    update.message.reply_text("Карта " + card_num + ' заблокирована')
+    return 2
+
+# def block(update: Update, context: CallbackContext):
+
 def main() -> None:
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
 
-
     dispatcher.add_handler(CommandHandler("start", start))
-    # Dialog = ConversationHandler(
-    #     entry_points=[CommandHandler('practice', conv_begin)],
-    #     states={
-    #         1: [MessageHandler(Filters.text, practice)],
-    #         2: [MessageHandler(Filters.text, check)],
-    #     },
-    #     fallbacks=[MessageHandler(Filters.text, start)]
-    # )
+    dispatcher.add_handler(CommandHandler("info", info))
+
+    Dialog_block = ConversationHandler(
+        entry_points=[CommandHandler('block', enter_card_number)],
+        states={
+            1: [MessageHandler(Filters.text, enter_pin_code)],
+            2: [MessageHandler(Filters.text, block)],
+        },
+        fallbacks=[MessageHandler(Filters.text, start)]
+    )
     #
     # Dialog_theory = ConversationHandler(
     #     entry_points=[CommandHandler('theory', conv_begin)],
@@ -34,10 +61,10 @@ def main() -> None:
     #     fallbacks=[MessageHandler(Filters.text, start)]
     # )
     # # dispatcher.add_handler(CommandHandler("photo", send_photo))
-    # dispatcher.add_handler(Dialog)
+    dispatcher.add_handler(Dialog_block)
     # dispatcher.add_handler(Dialog_theory)
-    # dispatcher.add_handler(MessageHandler(Filters.text, help_command))
 
+    # dispatcher.add_handler(MessageHandler(Filters.text, help_command))
     updater.start_polling()
 
     updater.idle()
