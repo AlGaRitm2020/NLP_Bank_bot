@@ -6,7 +6,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 from nlp import get_stems, check_stems
 from key_words import KeyWords
 
-print(KeyWords.block)
+
 TOKEN = '1779872877:AAFM0z3EPu23T169XtMcD7DUEvfcRYSb2H4'
 
 
@@ -122,33 +122,45 @@ def get_source_code(update: Update, context: CallbackContext):
 
 
 def stream(update, context):
+    is_answered = False
     stems = get_stems(update.message.text)
     if check_stems(stems, KeyWords.help):
         reply_keyboard = [['/help']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Если у вас возникла проблема нажмите /help',
                                   reply_markup=markup)
+        is_answered = True
     if check_stems(stems, KeyWords.block):
         reply_keyboard = [['/block']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Если вы хотите заблокировать карту нажмите /block',
                                   reply_markup=markup)
+        is_answered = True
     if check_stems(stems, KeyWords.transfer):
         reply_keyboard = [['/transfer']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Если вы хотите совершить перевод карту нажмите /transfer',
                                   reply_markup=markup)
+        is_answered = True
     if check_stems(stems, KeyWords.balance):
         reply_keyboard = [['/balance']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы узнать баланс вашей карты нажмите /balance',
                                   reply_markup=markup)
+        is_answered = True
 
     if check_stems(stems, KeyWords.info):
         info(update, context)
+        is_answered = True
 
     if check_stems(stems, KeyWords.link):
         get_source_code(update, context)
+        is_answered = True
+    if not is_answered:
+        reply_keyboard = [[]]
+        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        update.message.reply_text('К сожалению я не понял вас',
+                                  reply_markup=markup)
 
 
 

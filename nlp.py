@@ -4,7 +4,6 @@ from nltk.stem import SnowballStemmer
 
 import pymorphy2
 
-
 def get_stems(message):
     morph = pymorphy2.MorphAnalyzer()
     example_sent = morph.parse(message)[0].normal_form
@@ -20,7 +19,3 @@ def check_stems(stems: list, key_words: list) -> bool:
         if word in key_words:
             return True
 
-
-# это для выявление основы слов и для исправление неправильных слов
-
-print(get_stems('это для выявление основы слов и для исправление неправильных слов'))
