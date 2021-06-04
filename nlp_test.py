@@ -4,7 +4,6 @@ from nltk.stem import SnowballStemmer
 snowball = SnowballStemmer(language="russian")
 snowball.stem("Хороший")
 print(snowball.stem("Хороший"))
-ин
 wiki = TextBlob("Python is a high-level, general-purpose programming language. Hi")
 
 
