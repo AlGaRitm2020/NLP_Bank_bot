@@ -110,7 +110,7 @@ def start_help(update: Update, context: CallbackContext):
 
 def send_feedback(update: Update, context: CallbackContext):
     feedback = update.message.text
-    user = str(update.message.from_user.first_name) + str(update.message.from_user.last_name)
+    user = str(update.message.from_user.first_name)+ ' ' + str(update.message.from_user.last_name)
     print(f'from: {user} \nmessage: {feedback}\n')
     update.message.reply_text(f"Ваше сообщение отправлено")
     return ConversationHandler.END
