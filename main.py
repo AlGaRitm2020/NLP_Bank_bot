@@ -101,9 +101,12 @@ def get_balance(update: Update, context: CallbackContext):
     update.message.reply_text(f"Баланс карты {card_num} составляет {balance} рублей")
     return
 
+
 def start_help(update: Update, context: CallbackContext):
-    update.message.reply_text(f"Опишите вашу проблему как можно более подробно. Оператор увидит ваше сообщение")
+    update.message.reply_text(
+        f"Опишите вашу проблему как можно более подробно. Оператор увидит ваше сообщение")
     return 1
+
 
 def send_feedback(update: Update, context: CallbackContext):
     feedback = update.message.text
@@ -112,6 +115,10 @@ def send_feedback(update: Update, context: CallbackContext):
     update.message.reply_text(f"Ваше сообщение отправлено")
     return ConversationHandler.END
 
+
+def get_source_code(update: Update, context: CallbackContext):
+    update.message.reply_text(f"Исходный код бота вы можете посмотреть здесь \n "
+                              f"https://github.com/AlGaRitm2020/NLP_Bank_bot")
 
 
 def stream(update, context):
@@ -136,6 +143,8 @@ def stream(update, context):
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы узнать баланс вашей карты нажмите /balance',
                                   reply_markup=markup)
+    if check_stems(stems, KeyWords.link):
+        get_source_code(update, context)
 
 
 def main() -> None:
@@ -144,6 +153,7 @@ def main() -> None:
 
     dispatcher.add_handler(CommandHandler("info", info))
     dispatcher.add_handler(CommandHandler("balance", get_balance))
+    dispatcher.add_handler(CommandHandler('code', get_source_code))
 
     dialog_start = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
