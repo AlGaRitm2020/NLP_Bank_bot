@@ -3,6 +3,10 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, \
     ConversationHandler
 
+from nlp import get_stems, check_stems
+from key_words import KeyWords
+
+print(KeyWords.block)
 TOKEN = '1779872877:AAFM0z3EPu23T169XtMcD7DUEvfcRYSb2H4'
 
 
@@ -21,6 +25,7 @@ def info(update: Update, context: CallbackContext):
 
 
 def enter_card_number(update: Update, context: CallbackContext):
+
     update.message.reply_text("Введите номер своей карты:")
     return 1
 
@@ -93,17 +98,19 @@ def get_balance(update: Update, context: CallbackContext):
 
 
 def stream(update, context):
-    if update.message.text == 'block':
+    stems = get_stems(update.message.text)
+
+    if check_stems(stems, KeyWords.block):
         reply_keyboard = [['/block']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Если вы хотите заблокировать карту нажмите /block',
                                   reply_markup=markup)
-    elif update.message.text == 'transfer':
+    if check_stems(stems, KeyWords.transfer):
         reply_keyboard = [['/transfer']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Если вы хотите совершить перевод карту нажмите /transfer',
                                   reply_markup=markup)
-    elif update.message.text == 'balance':
+    if check_stems(stems, KeyWords.balance):
         reply_keyboard = [['/balance']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы узнать баланс вашей карты нажмите /balance',
