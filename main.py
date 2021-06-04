@@ -143,8 +143,14 @@ def stream(update, context):
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы узнать баланс вашей карты нажмите /balance',
                                   reply_markup=markup)
+
+    if check_stems(stems, KeyWords.info):
+        info(update, context)
+
     if check_stems(stems, KeyWords.link):
         get_source_code(update, context)
+
+
 
 
 def main() -> None:
