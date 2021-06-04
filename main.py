@@ -125,6 +125,7 @@ def currency(update: Update, context: CallbackContext):
     update.message.reply_text(get_currency())
 
 
+
 def stream(update, context):
     is_answered = False
     stems = get_stems(update.message.text)
@@ -151,6 +152,16 @@ def stream(update, context):
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы узнать баланс вашей карты нажмите /balance',
                                   reply_markup=markup)
+        is_answered = True
+    if check_stems(stems, KeyWords.logout):
+        reply_keyboard = [['/start']]
+        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        update.message.reply_text('Чтобы выйти из текущей карты нажмите /start',
+                                  reply_markup=markup)
+        is_answered = True
+
+    if check_stems(stems, KeyWords.logout):
+        logout(update, context)
         is_answered = True
 
     if check_stems(stems, KeyWords.info):
