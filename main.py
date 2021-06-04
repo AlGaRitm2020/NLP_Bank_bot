@@ -5,7 +5,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Callb
 
 from nlp import get_stems, check_stems
 from key_words import KeyWords
-
+from pycbrf_test import get_currency
 
 TOKEN = '1779872877:AAFM0z3EPu23T169XtMcD7DUEvfcRYSb2H4'
 
@@ -197,6 +197,14 @@ def main() -> None:
         states={
             1: [MessageHandler(Filters.text, enter_amount)],
             2: [MessageHandler(Filters.text, send_money)],
+        },
+        fallbacks=[MessageHandler(Filters.text, start)]
+    )
+    dialog_help = ConversationHandler(
+        entry_points=[CommandHandler('help', start_help)],
+        states={
+            1: [MessageHandler(Filters.text, send_feedback)],
+
         },
         fallbacks=[MessageHandler(Filters.text, start)]
     )
