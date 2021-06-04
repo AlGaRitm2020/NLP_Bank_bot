@@ -38,10 +38,23 @@ def enter_cvv_code(update: Update, context: CallbackContext):
     return 3
 
 def finish_login(update: Update, context: CallbackContext):
+    global card_num
     cvv_code = update.message.text
     update.message.reply_text(f"Вы вошли в систему с картой {card_num}")
     return ConversationHandler.END
 
+def start_blocking(update: Update, context: CallbackContext):
+    global card_num
+    update.message.reply_text(f"Вы уверены что хотите заблокировать карту {card_num}?")
+    update.message.reply_text("Введите пин код карты для подтверждения")
+    return 1
+
+def finish_blocking(update: Update, context: CallbackContext):
+    pin_code = update.message.text
+    reply_keyboard = [['/start']]
+    markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+    update.message.reply_text(f"Вы заблокировали карту {card_num}", reply_markup=markup)
+    return ConversationHandler.END
 
 def block(update: Update, context: CallbackContext):
     global card_num
@@ -50,26 +63,18 @@ def block(update: Update, context: CallbackContext):
     return ConversationHandler.END
 
 
-def start_transfer(update: Update, context: CallbackContext):
-    update.message.reply_text("Введите номер вашей карты")
-    return 1
-
-
-
-
-
 def enter_addressee_name(update: Update, context: CallbackContext):
     global cvv_code
     cvv_code = update.message.text
     update.message.reply_text("Введите номер карты адресата")
-    return 3
+    return 1
 
 
 def enter_amount(update: Update, context: CallbackContext):
     global addressee_card
     addressee_card = update.message.text
     update.message.reply_text("Введите сумму перевода")
-    return 4
+    return 2
 
 
 def send_money(update: Update, context: CallbackContext):
@@ -81,9 +86,10 @@ def send_money(update: Update, context: CallbackContext):
 
 
 def get_balance(update: Update, context: CallbackContext):
+    global card_num
     balance = randint(0, 100000)
-    update.message.reply_text(f"Ваш баланс: {balance} рублей")
-    return ConversationHandler.END
+    update.message.reply_text(f"Баланс карты {card_num} составляет {balance} рублей")
+    return
 
 
 def stream(update, context):
@@ -124,38 +130,29 @@ def main() -> None:
     )
 
     dialog_block = ConversationHandler(
-        entry_points=[CommandHandler('block', enter_card_number)],
+        entry_points=[CommandHandler('block', start_blocking)],
         states={
-            1: [MessageHandler(Filters.text, enter_pin_code)],
-            2: [MessageHandler(Filters.text, block)],
+            1: [MessageHandler(Filters.text, finish_blocking)],
+
         },
         fallbacks=[MessageHandler(Filters.text, start)]
     )
 
     dialog_transfer = ConversationHandler(
-        entry_points=[CommandHandler('transfer', enter_card_number)],
+        entry_points=[CommandHandler('transfer', enter_addressee_name)],
         states={
-            1: [MessageHandler(Filters.text, enter_cvv_code)],
-            2: [MessageHandler(Filters.text, enter_addressee_name)],
-            3: [MessageHandler(Filters.text, enter_amount)],
-            4: [MessageHandler(Filters.text, send_money)],
+            1: [MessageHandler(Filters.text, enter_amount)],
+            2: [MessageHandler(Filters.text, send_money)],
         },
         fallbacks=[MessageHandler(Filters.text, start)]
     )
 
-    dialog_balance = ConversationHandler(
-        entry_points=[CommandHandler('balance', enter_card_number)],
-        states={
-            1: [MessageHandler(Filters.text, enter_pin_code)],
-            2: [MessageHandler(Filters.text, get_balance)],
-        },
-        fallbacks=[MessageHandler(Filters.text, start)]
-    )
+
 
     dispatcher.add_handler(dialog_start)
     dispatcher.add_handler(dialog_block)
     dispatcher.add_handler(dialog_transfer)
-    dispatcher.add_handler(dialog_balance)
+
 
 
     text_handler = MessageHandler(Filters.text, stream)
