@@ -3,14 +3,17 @@ from telegram import Update, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, \
     ConversationHandler
 
-TOKEN = '1779872877:AAGKs54Jotb37C0E7TYe0qx1KMMMkqLEYwk'
+TOKEN = '1779872877:AAFM0z3EPu23T169XtMcD7DUEvfcRYSb2H4'
 
 
 def start(update: Update, context: CallbackContext):
     update.message.reply_text('Добро пожаловать! \n' +
-                              'Я телеграм бот-помощник NLP-bank. Я могу показать инормацию \
-                                о банке, посмотреть бадланс, перевести деньги, забокировать \
-                                карту, написать в поддержку')
+                              'Я телеграм бот-помощник NLP-bank. Я могу показать инормацию '+
+                                'о банке, посмотреть бадланс, перевести деньги, забокировать' +
+                                'карту, написать в поддержку. \n' + 'Для начала работы введите'+
+                                ' номер вашей карты')
+
+    return 1
 
 
 def info(update: Update, context: CallbackContext):
@@ -19,20 +22,28 @@ def info(update: Update, context: CallbackContext):
 
 def enter_card_number(update: Update, context: CallbackContext):
     update.message.reply_text("Введите номер своей карты:")
-    print('enter 1')
     return 1
 
 
 def enter_pin_code(update: Update, context: CallbackContext):
-    print('enter 2')
     global card_num
     card_num = update.message.text
     update.message.reply_text("Введите пин код карты:")
     return 2
 
+def enter_cvv_code(update: Update, context: CallbackContext):
+    global pin_code
+    pin_code = update.message.text
+    update.message.reply_text("Введите cvv код карты:")
+    return 3
+
+def finish_login(update: Update, context: CallbackContext):
+    cvv_code = update.message.text
+    update.message.reply_text(f"Вы вошли в систему с картой {card_num}")
+    return ConversationHandler.END
+
 
 def block(update: Update, context: CallbackContext):
-    print('enter 3')
     global card_num
     pin_code = update.message.text
     update.message.reply_text("Карта " + card_num + ' заблокирована')
@@ -41,15 +52,10 @@ def block(update: Update, context: CallbackContext):
 
 def start_transfer(update: Update, context: CallbackContext):
     update.message.reply_text("Введите номер вашей карты")
-    print('enter 1')
     return 1
 
 
-def enter_cvv_code(update: Update, context: CallbackContext):
-    global card_num
-    card_num = update.message.text
-    update.message.reply_text("Введите cvv код карты:")
-    return 2
+
 
 
 def enter_addressee_name(update: Update, context: CallbackContext):
@@ -103,9 +109,19 @@ def stream(update, context):
 def main() -> None:
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(CommandHandler("start", start))
+
     dispatcher.add_handler(CommandHandler("info", info))
     dispatcher.add_handler(CommandHandler("balance", get_balance))
+
+    dialog_start = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            1: [MessageHandler(Filters.text, enter_pin_code)],
+            2: [MessageHandler(Filters.text, enter_cvv_code)],
+            3: [MessageHandler(Filters.text, finish_login)],
+        },
+        fallbacks=[MessageHandler(Filters.text, start)]
+    )
 
     dialog_block = ConversationHandler(
         entry_points=[CommandHandler('block', enter_card_number)],
@@ -136,6 +152,7 @@ def main() -> None:
         fallbacks=[MessageHandler(Filters.text, start)]
     )
 
+    dispatcher.add_handler(dialog_start)
     dispatcher.add_handler(dialog_block)
     dispatcher.add_handler(dialog_transfer)
     dispatcher.add_handler(dialog_balance)
