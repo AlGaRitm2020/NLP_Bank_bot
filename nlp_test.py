@@ -4,7 +4,7 @@ from nltk.stem import SnowballStemmer
 snowball = SnowballStemmer(language="russian")
 snowball.stem("Хороший")
 print(snowball.stem("Хороший"))
-
+ин
 wiki = TextBlob("Python is a high-level, general-purpose programming language. Hi")
 
 
@@ -17,7 +17,13 @@ wiki = TextBlob("Python is a high-level, general-purpose programming language. H
 
 
 
-example_sent = """500 рублнй"""
-word_list2 = [SnowballStemmer(language="russian").stem(TextBlob(w[0]).correct()) for w in TextBlob(example_sent).tags if w[0].strip() not in nltk.corpus.stopwords.words('russian')]
+# это для выявление основы слов и для исправление неправельных слов
+import pymorphy2
+morph = pymorphy2.MorphAnalyzer()
+example_sent = morph.parse(input())[0].normal_form
+
+word_list2 = [SnowballStemmer(language="russian").stem(w[0])
+              for w in TextBlob(example_sent).tags
+              if w[0] not in nltk.corpus.stopwords.words('russian')]
 
 print(word_list2)
