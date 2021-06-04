@@ -120,6 +120,9 @@ def get_source_code(update: Update, context: CallbackContext):
     update.message.reply_text(f"Исходный код бота вы можете посмотреть здесь \n "
                               f"https://github.com/AlGaRitm2020/NLP_Bank_bot")
 
+def currency(update: Update, context: CallbackContext):
+    update.message.reply_text(get_currency())
+
 
 def stream(update, context):
     is_answered = False
@@ -156,6 +159,11 @@ def stream(update, context):
     if check_stems(stems, KeyWords.link):
         get_source_code(update, context)
         is_answered = True
+
+    if check_stems(stems, KeyWords.currency):
+        currency(update, context)
+        is_answered = True
+
     if not is_answered:
         reply_keyboard = [[]]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
@@ -172,6 +180,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("info", info))
     dispatcher.add_handler(CommandHandler("balance", get_balance))
     dispatcher.add_handler(CommandHandler('code', get_source_code))
+    dispatcher.add_handler(CommandHandler('currency', currency))
 
     dialog_start = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
@@ -208,19 +217,13 @@ def main() -> None:
         },
         fallbacks=[MessageHandler(Filters.text, start)]
     )
-    dialog_help = ConversationHandler(
-        entry_points=[CommandHandler('help', start_help)],
-        states={
-            1: [MessageHandler(Filters.text, send_feedback)],
 
-        },
-        fallbacks=[MessageHandler(Filters.text, start)]
-    )
 
     dispatcher.add_handler(dialog_start)
     dispatcher.add_handler(dialog_block)
     dispatcher.add_handler(dialog_transfer)
     dispatcher.add_handler(dialog_help)
+
 
     text_handler = MessageHandler(Filters.text, stream)
 
