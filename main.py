@@ -126,6 +126,8 @@ def currency(update: Update, context: CallbackContext):
 
 
 
+
+
 def stream(update, context):
     is_answered = False
     stems = get_stems(update.message.text)
@@ -158,10 +160,6 @@ def stream(update, context):
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы выйти из текущей карты нажмите /start',
                                   reply_markup=markup)
-        is_answered = True
-
-    if check_stems(stems, KeyWords.logout):
-        logout(update, context)
         is_answered = True
 
     if check_stems(stems, KeyWords.info):
@@ -226,6 +224,16 @@ def main() -> None:
         states={
             1: [MessageHandler(Filters.text, send_feedback)],
 
+        },
+        fallbacks=[MessageHandler(Filters.text, start)]
+    )
+
+    dialog_create_card = ConversationHandler(
+        entry_points=[CommandHandler('new', start_creating_new_card)],
+        states={
+            1: [MessageHandler(Filters.text, enter_pin_code)],
+            2: [MessageHandler(Filters.text, enter_cvv_code)],
+            3: [MessageHandler(Filters.text, finish_login)],
         },
         fallbacks=[MessageHandler(Filters.text, start)]
     )
