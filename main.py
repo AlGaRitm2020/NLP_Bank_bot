@@ -126,7 +126,7 @@ def currency(update: Update, context: CallbackContext):
 
 def create_new_card(update: Update, context: CallbackContext):
     global card_num
-    card_num = '4297 ' + ' '.join(([str(randint(10**4, 10**5)) for _ in range(3)]))
+    card_num = '4297 ' + ' '.join(([str(randint(10**3, 10**4)) for _ in range(3)]))
     pin_code = str(randint(10**3, 10**4))
     cvv_code = str(randint(10**2, 10**3))
     update.message.reply_text(f"Новая карта с номером {card_num} успешно зарегистрирована")
@@ -166,6 +166,13 @@ def stream(update, context):
         reply_keyboard = [['/start']]
         markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
         update.message.reply_text('Чтобы выйти из текущей карты нажмите /start',
+                                  reply_markup=markup)
+        is_answered = True
+
+    if check_stems(stems, KeyWords.new):
+        reply_keyboard = [['/new']]
+        markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+        update.message.reply_text('Чтобы выпустить новую карту нажмите /new',
                                   reply_markup=markup)
         is_answered = True
 
