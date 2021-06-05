@@ -124,7 +124,14 @@ def get_source_code(update: Update, context: CallbackContext):
 def currency(update: Update, context: CallbackContext):
     update.message.reply_text(get_currency())
 
-
+def create_new_card(update: Update, context: CallbackContext):
+    global card_num
+    card_num = '4297 ' + ' '.join(([str(randint(10**4, 10**5)) for _ in range(3)]))
+    pin_code = str(randint(10**3, 10**4))
+    cvv_code = str(randint(10**2, 10**3))
+    update.message.reply_text(f"Новая карта с номером {card_num} успешно зарегистрирована")
+    update.message.reply_text(f"Пин код новой карты: {pin_code}")
+    update.message.reply_text(f"Cvv код новой карты: {cvv_code}")
 
 
 
@@ -191,6 +198,7 @@ def main() -> None:
     dispatcher.add_handler(CommandHandler("balance", get_balance))
     dispatcher.add_handler(CommandHandler('code', get_source_code))
     dispatcher.add_handler(CommandHandler('currency', currency))
+    dispatcher.add_handler(CommandHandler('new', create_new_card))
 
     dialog_start = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
@@ -228,15 +236,6 @@ def main() -> None:
         fallbacks=[MessageHandler(Filters.text, start)]
     )
 
-    dialog_create_card = ConversationHandler(
-        entry_points=[CommandHandler('new', start_creating_new_card)],
-        states={
-            1: [MessageHandler(Filters.text, enter_pin_code)],
-            2: [MessageHandler(Filters.text, enter_cvv_code)],
-            3: [MessageHandler(Filters.text, finish_login)],
-        },
-        fallbacks=[MessageHandler(Filters.text, start)]
-    )
 
 
     dispatcher.add_handler(dialog_start)
