@@ -16,7 +16,7 @@ def start(update: Update, context: CallbackContext):
                               'о банке, посмотреть баланс, перевести деньги, забокировать' +
                               'карту, написать в поддержку. \n' + 'Для начала работы введите' +
                               ' номер вашей карты')
-    update.message.reply_text( 'Для начала работы введите номер вашей карты')
+    update.message.reply_text('Для начала работы введите номер вашей карты')
 
     return 1
 
@@ -41,8 +41,6 @@ def enter_pin_code(update: Update, context: CallbackContext):
     return 1
 
 
-
-
 def enter_cvv_code(update: Update, context: CallbackContext):
     global pin_code
     pin_code = update.message.text
@@ -54,11 +52,12 @@ def enter_cvv_code(update: Update, context: CallbackContext):
 
 
 def finish_login(update: Update, context: CallbackContext):
-    global card_num
+    global card_num, cvv_code
     cvv_code = update.message.text
-    update.message.reply_text(f"Вы вошли в систему с картой {card_num}")
-
-    return ConversationHandler.END
+    if cvv_code.isnumeric() and len(cvv_code) == 3:
+        update.message.reply_text(f"Вы вошли в систему с картой {card_num}")
+        return ConversationHandler.END
+    update.message.reply_text("Cvv код должен состоять из трех цифр.")
 
 
 def start_blocking(update: Update, context: CallbackContext):
@@ -84,11 +83,25 @@ def finish_blocking(update: Update, context: CallbackContext):
     return 1
 
 
+def start_transfer(update: Update, context: CallbackContext):
+    global card_num
+    update.message.reply_text(f"Вы уверены что хотите отправить деньги с карты {card_num}?")
+    update.message.reply_text("Введите cvv код карты для подтверждения")
+    return 1
+
+
 def enter_addressee_name(update: Update, context: CallbackContext):
     global cvv_code
-    cvv_code = update.message.text
-    update.message.reply_text("Введите номер карты адресата")
+    cvv_code_checking = update.message.text
+    if cvv_code_checking.isnumeric() and len(cvv_code_checking) == 3:
+        if cvv_code_checking == cvv_code:
+            update.message.reply_text("Введите номер карты адресата")
+            return 2
+        update.message.reply_text("Неверный cvv код. Попробуйте еще раз.")
+        return 1
+    update.message.reply_text("Cvv код должен состоять из трех цифр. Попробуйте еще раз.")
     return 1
+
 
 
 def enter_amount(update: Update, context: CallbackContext):
@@ -96,9 +109,9 @@ def enter_amount(update: Update, context: CallbackContext):
     addressee_card = update.message.text.replace(' ', '')
     if addressee_card.isnumeric() and len(addressee_card) == 16:
         update.message.reply_text("Введите сумму перевода (в рублях)")
-        return 2
+        return 3
     update.message.reply_text("Номер карты должен содержать 16 цифр. Попробуйте еще раз.")
-    return 1
+    return 2
 
 
 def send_money(update: Update, context: CallbackContext):
@@ -110,7 +123,7 @@ def send_money(update: Update, context: CallbackContext):
             f"{addressee_card} в размере {ammount} руб")
         return ConversationHandler.END
     update.message.reply_text("Сумма перевода должна быть целым числом. Попробуйте еще раз.")
-    return 2
+    return 3
 
 
 def get_balance(update: Update, context: CallbackContext):
@@ -128,7 +141,7 @@ def start_help(update: Update, context: CallbackContext):
 
 def send_feedback(update: Update, context: CallbackContext):
     feedback = update.message.text
-    user = str(update.message.from_user.first_name)+ ' ' + str(update.message.from_user.last_name)
+    user = str(update.message.from_user.first_name) + ' ' + str(update.message.from_user.last_name)
     print(f'from: {user} \nmessage: {feedback}\n')
     update.message.reply_text(f"Ваше сообщение отправлено")
     return ConversationHandler.END
@@ -138,18 +151,19 @@ def get_source_code(update: Update, context: CallbackContext):
     update.message.reply_text(f"Исходный код бота вы можете посмотреть здесь \n "
                               f"https://github.com/AlGaRitm2020/NLP_Bank_bot")
 
+
 def currency(update: Update, context: CallbackContext):
     update.message.reply_text(get_currency())
 
+
 def create_new_card(update: Update, context: CallbackContext):
-    global card_num
-    card_num = '4297 ' + ' '.join(([str(randint(10**3, 10**4)) for _ in range(3)]))
-    pin_code = str(randint(10**3, 10**4))
-    cvv_code = str(randint(10**2, 10**3))
+    global card_num, pin_code, cvv_code
+    card_num = '4297 ' + ' '.join(([str(randint(10 ** 3, 10 ** 4)) for _ in range(3)]))
+    pin_code = str(randint(10 ** 3, 10 ** 4))
+    cvv_code = str(randint(10 ** 2, 10 ** 3))
     update.message.reply_text(f"Новая карта с номером {card_num} успешно зарегистрирована")
     update.message.reply_text(f"Пин код новой карты: {pin_code}")
     update.message.reply_text(f"Cvv код новой карты: {cvv_code}")
-
 
 
 def stream(update, context):
@@ -212,8 +226,6 @@ def stream(update, context):
                                   reply_markup=markup)
 
 
-
-
 def main() -> None:
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
@@ -244,10 +256,11 @@ def main() -> None:
     )
 
     dialog_transfer = ConversationHandler(
-        entry_points=[CommandHandler('transfer', enter_addressee_name)],
+        entry_points=[CommandHandler('transfer', start_transfer)],
         states={
-            1: [MessageHandler(Filters.text, enter_amount)],
-            2: [MessageHandler(Filters.text, send_money)],
+            1: [MessageHandler(Filters.text, enter_addressee_name)],
+            2: [MessageHandler(Filters.text, enter_amount)],
+            3: [MessageHandler(Filters.text, send_money)],
         },
         fallbacks=[MessageHandler(Filters.text, start)]
     )
@@ -260,13 +273,10 @@ def main() -> None:
         fallbacks=[MessageHandler(Filters.text, start)]
     )
 
-
-
     dispatcher.add_handler(dialog_start)
     dispatcher.add_handler(dialog_block)
     dispatcher.add_handler(dialog_transfer)
     dispatcher.add_handler(dialog_help)
-
 
     text_handler = MessageHandler(Filters.text, stream)
 
