@@ -46,8 +46,11 @@ def enter_pin_code(update: Update, context: CallbackContext):
 def enter_cvv_code(update: Update, context: CallbackContext):
     global pin_code
     pin_code = update.message.text
-    update.message.reply_text("Введите cvv код карты:")
-    return 3
+    if pin_code.isnumeric() and len(pin_code) == 4:
+        update.message.reply_text("Введите cvv код карты:")
+        return 3
+    update.message.reply_text("Пин код должен состоять из четырех цифр.")
+    return 2
 
 
 def finish_login(update: Update, context: CallbackContext):
@@ -67,18 +70,18 @@ def start_blocking(update: Update, context: CallbackContext):
 
 
 def finish_blocking(update: Update, context: CallbackContext):
-    pin_code = update.message.text
-    reply_keyboard = [['/start']]
-    markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
-    update.message.reply_text(f"Вы заблокировали карту {card_num}", reply_markup=markup)
-    return ConversationHandler.END
-
-
-def block(update: Update, context: CallbackContext):
-    global card_num
-    pin_code = update.message.text
-    update.message.reply_text("Карта " + card_num + ' заблокирована')
-    return ConversationHandler.END
+    global pin_code
+    pin_code_checking = update.message.text
+    if pin_code_checking.isnumeric() and len(pin_code_checking) == 4:
+        if pin_code_checking == pin_code:
+            reply_keyboard = [['/start']]
+            markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+            update.message.reply_text(f"Вы заблокировали карту {card_num}", reply_markup=markup)
+            return ConversationHandler.END
+        update.message.reply_text("Неверный пин код")
+        return 1
+    update.message.reply_text("Пин код должен состоять из четырех цифр.")
+    return 1
 
 
 def enter_addressee_name(update: Update, context: CallbackContext):
