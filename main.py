@@ -34,8 +34,13 @@ def enter_card_number(update: Update, context: CallbackContext):
 def enter_pin_code(update: Update, context: CallbackContext):
     global card_num
     card_num = update.message.text
-    update.message.reply_text("Введите пин код карты:")
-    return 2
+    if card_num.isnumeric() and len(card_num) == 16:
+        update.message.reply_text("Введите пин код карты:")
+        return 2
+    update.message.reply_text("Номер карты должен содержать 16 цифр. Попробуйте еще раз.")
+    return 1
+
+
 
 
 def enter_cvv_code(update: Update, context: CallbackContext):
@@ -49,6 +54,7 @@ def finish_login(update: Update, context: CallbackContext):
     global card_num
     cvv_code = update.message.text
     update.message.reply_text(f"Вы вошли в систему с картой {card_num}")
+
     return ConversationHandler.END
 
 
@@ -56,6 +62,7 @@ def start_blocking(update: Update, context: CallbackContext):
     global card_num
     update.message.reply_text(f"Вы уверены что хотите заблокировать карту {card_num}?")
     update.message.reply_text("Введите пин код карты для подтверждения")
+
     return 1
 
 
@@ -83,9 +90,12 @@ def enter_addressee_name(update: Update, context: CallbackContext):
 
 def enter_amount(update: Update, context: CallbackContext):
     global addressee_card
-    addressee_card = update.message.text
-    update.message.reply_text("Введите сумму перевода")
-    return 2
+    addressee_card = update.message.text.replace(' ', '')
+    if addressee_card.isnumeric() and len(addressee_card) == 16:
+        update.message.reply_text("Введите сумму перевода (в рублях)")
+        return 2
+    update.message.reply_text("Номер карты должен содержать 16 цифр. Попробуйте еще раз.")
+    return 1
 
 
 def send_money(update: Update, context: CallbackContext):
