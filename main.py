@@ -101,15 +101,19 @@ def enter_amount(update: Update, context: CallbackContext):
 def send_money(update: Update, context: CallbackContext):
     global addressee_card, cvv_code, card_num
     ammount = update.message.text
-    update.message.reply_text(
-        f"Совершен перевод с карты {card_num} на карту {addressee_card} в размере {ammount} рублей")
-    return ConversationHandler.END
+    if ammount.isnumeric():
+        update.message.reply_text(
+            f"Совершен перевод с карты {card_num} на карту "
+            f"{addressee_card} в размере {ammount} руб")
+        return ConversationHandler.END
+    update.message.reply_text("Сумма перевода должна быть целым числом. Попробуйте еще раз.")
+    return 2
 
 
 def get_balance(update: Update, context: CallbackContext):
     global card_num
     balance = randint(0, 100000)
-    update.message.reply_text(f"Баланс карты {card_num} составляет {balance} рублей")
+    update.message.reply_text(f"Баланс карты {card_num} составляет {balance} руб")
     return
 
 
