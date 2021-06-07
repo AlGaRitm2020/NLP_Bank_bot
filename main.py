@@ -23,7 +23,12 @@ def start(update: Update, context: CallbackContext):
 
 def info(update: Update, context: CallbackContext):
     update.message.reply_text('NLP-bank — крупнейший банк в России, Центральной и Восточной '
-                              'Европе, один из ведущих международных финансовых институтов')
+                              'Европе, один из ведущих международных финансовых институтов' +
+                              'Я телеграм бот-помощник NLP-bank. Я могу показать инормацию ' +
+                              'о банке, посмотреть баланс, перевести деньги, забокировать' +
+                              'карту, написать в поддержку. \n' + 'Для начала работы введите' +
+                              ' номер вашей карты'
+                              )
 
 
 def enter_card_number(update: Update, context: CallbackContext):
